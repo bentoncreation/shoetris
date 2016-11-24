@@ -1,8 +1,9 @@
 class Iblock
-  attr_reader :color
-  attr_accessor :left, :top, :shape
+  attr_reader :color, :id
+  attr_accessor :left, :top, :bottom, :shape, :rendered
 
   def initialize(renderer = Proc.new {})
+    @id = SecureRandom.uuid
     @left = 0
     @top = 0
     @shape = default_shape
@@ -85,13 +86,13 @@ Shoes.app width: 400, height: 620, resizable: false do
   rect(0, 600, 400, 20, fill: red)
 
   renderer = Proc.new do |b|
-    @block_shape.remove if !@block_shape.nil?
-    @block_shape = shape_for(b)
+    b.rendered.remove if !b.rendered.nil?
+    b.rendered = shape_for(b)
   end
 
   def shape_for(block)
     shape do
-      fill "#0ff"
+      fill block.color
       block.shape.each_with_index do |row, y|
         row.each_with_index do |col, x|
           rect(block.left + x * block.block_size, block.top + y * block.block_size, block.block_size, block.block_size) if col
@@ -100,26 +101,28 @@ Shoes.app width: 400, height: 620, resizable: false do
     end
   end
 
-  @block = Iblock.new(renderer)
+  @blocks = []
 
   @anim = animate 1 do
-    if @block.bottom >= 600
-      @anim.stop and alert('Done!')
-      break
+    if @current_block.nil? || @current_block.bottom >= 600
+      @new_block = Iblock.new(renderer)
+      @blocks << @new_block
+      @current_block = @new_block
+      # @anim.stop and alert('Done!')
+    else
+      @current_block.move_down
     end
-
-    @block.move_down
   end
 
   keypress do |key|
     if key == :left
-      @block.move_left
+      @current_block.move_left
     elsif key == :right
-      @block.move_right
+      @current_block.move_right
     elsif key == :up
-      @block.move_up
+      @current_block.move_up
     elsif key == :down
-      @block.move_down
+      @current_block.move_down
     end
   end
 end
