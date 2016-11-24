@@ -2,10 +2,13 @@ class Iblock
   attr_reader :color
   attr_accessor :left, :top, :shape
 
-  def initialize
+  def initialize(renderer = Proc.new {})
     @left = 0
     @top = 0
     @shape = default_shape
+    @renderer = renderer
+
+    @renderer.call(self)
   end
 
   def color
@@ -16,11 +19,34 @@ class Iblock
     40
   end
 
-  def rotate
-    @shape = @shape.transpose
+  def move_left
+    move(-block_size, 0) unless (left - block_size) < 0
+  end
+
+  def move_right
+    move(block_size, 0) unless (left + block_size + block_size) > 400
+  end
+
+  def move_up
+    rotate_counterclockwise unless (top + block_size) >= 600
+  end
+
+  def move_down
+    move(0, block_size) unless (top + block_size) >= 600
   end
 
   private
+
+  def move(move_left, move_top)
+    @left += move_left
+    @top += move_top
+    @renderer.call(self)
+  end
+
+  def rotate_counterclockwise
+    @shape = @shape.transpose
+    @renderer.call(self)
+  end
 
   def default_shape
     Array[
@@ -34,7 +60,12 @@ Shoes.app width: 400, height: 620, resizable: false do
   background white
   rect(0, 600, 400, 20, fill: red)
   @block_size = 40
-  @block = Iblock.new
+
+  renderer = Proc.new do |b|
+    debug "rendering"
+    @block_shape.remove if !@block_shape.nil?
+    @block_shape = shape_for(b)
+  end
 
   def shape_for(block)
     shape do
@@ -47,58 +78,26 @@ Shoes.app width: 400, height: 620, resizable: false do
     end
   end
 
-  def rotate(block)
-    block.rotate
-    render(block)
-  end
-
-  def move(block, move_left, move_top)
-    block.left += move_left
-    block.top += move_top
-    render(block)
-  end
-
-  def render(block)
-    @block_shape.remove if !@block_shape.nil?
-    @block_shape = shape_for(block)
-  end
-
-  def left(block)
-    move(block, -@block_size, 0) unless (block.left - @block_size) < 0
-  end
-
-  def right(block)
-    move(block, @block_size, 0) unless (block.left + @block_size + @block_size) > 400
-  end
-
-  def up(block)
-    rotate(block) unless (@block.top + @block_size) >= 600
-  end
-
-  def down(block)
-    move(block, 0, @block_size) unless (block.top + @block_size) >= 600
-  end
-
-  render(@block)
+  @block = Iblock.new(renderer)
 
   @anim = animate 1 do
-    if (@block.top + @block_size) >= 600
+    if (@block.top + @block.block_size) >= 600
       @anim.stop and alert('Done!')
       break
     end
 
-    down(@block)
+    @block.move_down
   end
 
   keypress do |key|
     if key == :left
-      left(@block)
+      @block.move_left
     elsif key == :right
-      right(@block)
+      @block.move_right
     elsif key == :up
-      up(@block)
+      @block.move_up
     elsif key == :down
-      down(@block)
+      @block.move_down
     end
   end
 end
