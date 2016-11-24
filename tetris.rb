@@ -11,6 +11,30 @@ class Iblock
     @renderer.call(self)
   end
 
+  def right
+    left + width
+  end
+
+  def bottom
+    top + height
+  end
+
+  def width
+    block_width * block_size
+  end
+
+  def block_width
+    shape.map { |row| row.rindex(true) || 0 }.max + 1
+  end
+
+  def height
+    block_height * block_size
+  end
+
+  def block_height
+    shape.count { |row| row.index(true) }
+  end
+
   def color
     "#0ff"
   end
@@ -24,15 +48,15 @@ class Iblock
   end
 
   def move_right
-    move(block_size, 0) unless (left + block_size + block_size) > 400
+    move(block_size, 0) unless (right + block_size) > 400
   end
 
   def move_up
-    rotate_counterclockwise unless (top + block_size) >= 600
+    rotate_counterclockwise unless (top + width) > 600
   end
 
   def move_down
-    move(0, block_size) unless (top + block_size) >= 600
+    move(0, block_size) unless (bottom + block_size) > 600
   end
 
   private
@@ -51,6 +75,7 @@ class Iblock
   def default_shape
     Array[
       [true, true, true, true],
+      [false, false, false, false],
     ]
   end
 end
@@ -78,7 +103,7 @@ Shoes.app width: 400, height: 620, resizable: false do
   @block = Iblock.new(renderer)
 
   @anim = animate 1 do
-    if (@block.top + @block.block_size) >= 600
+    if @block.bottom >= 600
       @anim.stop and alert('Done!')
       break
     end
