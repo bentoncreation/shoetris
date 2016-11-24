@@ -51,7 +51,6 @@ class Iblock
   def default_shape
     Array[
       [true, true, true, true],
-      [false, false, false, false]
     ]
   end
 end
@@ -59,10 +58,8 @@ end
 Shoes.app width: 400, height: 620, resizable: false do
   background white
   rect(0, 600, 400, 20, fill: red)
-  @block_size = 40
 
   renderer = Proc.new do |b|
-    debug "rendering"
     @block_shape.remove if !@block_shape.nil?
     @block_shape = shape_for(b)
   end
@@ -72,7 +69,7 @@ Shoes.app width: 400, height: 620, resizable: false do
       fill "#0ff"
       block.shape.each_with_index do |row, y|
         row.each_with_index do |col, x|
-          rect(block.left + x * @block_size, block.top + y * @block_size, @block_size, @block_size) if col
+          rect(block.left + x * block.block_size, block.top + y * block.block_size, block.block_size, block.block_size) if col
         end
       end
     end
