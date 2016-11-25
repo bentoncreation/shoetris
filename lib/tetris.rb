@@ -1,3 +1,4 @@
+require "lib/map"
 require "lib/piece/base_piece"
 require "lib/piece/i_piece"
 require "lib/piece/j_piece"
