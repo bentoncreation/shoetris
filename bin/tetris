@@ -1,4 +1,6 @@
-require "lib/tetris"
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift("#{File.dirname(__FILE__)}/../lib")
+require "tetris"
 
 Shoes.app width: 400, height: 620, resizable: false do
   background gray
@@ -29,12 +31,10 @@ Shoes.app width: 400, height: 620, resizable: false do
     end
   end
 
-  @pieces = []
-
   @anim = animate 1 do
     if @current_piece.nil? || @current_piece.blocked_down?
       @new_piece = Tetris::TPiece.new(@map, render_piece)
-      @pieces << @new_piece
+      @map.pieces << @new_piece
       @current_piece = @new_piece
       # @anim.stop and alert('Done!')
     else

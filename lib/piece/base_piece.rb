@@ -1,3 +1,5 @@
+require "securerandom"
+
 module Tetris
   class BasePiece
     attr_reader :color, :id

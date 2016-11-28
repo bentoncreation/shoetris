@@ -1,12 +1,12 @@
-require "lib/map"
-require "lib/piece/base_piece"
-require "lib/piece/i_piece"
-require "lib/piece/j_piece"
-require "lib/piece/l_piece"
-require "lib/piece/o_piece"
-require "lib/piece/s_piece"
-require "lib/piece/t_piece"
-require "lib/piece/z_piece"
+require "map"
+require "piece/base_piece"
+require "piece/i_piece"
+require "piece/j_piece"
+require "piece/l_piece"
+require "piece/o_piece"
+require "piece/s_piece"
+require "piece/t_piece"
+require "piece/z_piece"
 
 module Tetris
 end
