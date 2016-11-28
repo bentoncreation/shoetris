@@ -1,78 +1,104 @@
 module Tetris
   class BasePiece
     attr_reader :color, :id
-    attr_accessor :left, :top, :bottom, :shape, :rendered
+    attr_accessor :left, :top, :left_px, :top_px, :bottom, :shape, :rendered
 
-    def initialize(renderer = Proc.new {})
+    def initialize(map, renderer = Proc.new {})
       @id = SecureRandom.uuid
       @left = 0
       @top = 0
       @shape = default_shape
+      @map = map
       @renderer = renderer
 
       @renderer.call(self)
     end
 
-    def right
-      left + width
+    def at_left_edge?
     end
 
-    def bottom
-      top + height
+    def at_right_edge?
     end
 
-    def width
-      block_width * block_size
+    def blocked_down?
+      false
     end
 
-    def block_width
-      shape.map { |row| row.rindex(true) || 0 }.max + 1
+    # def right
+    #   left + width
+    # end
+
+    # def bottom
+    #   top + height
+    # end
+
+    # def width
+    #   block_width * block_size
+    # end
+
+    # def block_width
+    #   shape.map { |row| row.rindex(true) || 0 }.max + 1
+    # end
+
+    # def height
+    #   block_height * block_size
+    # end
+
+    # def block_height
+    #   shape.count { |row| row.index(true) }
+    # end
+
+    def left_px
+      left * 40
     end
 
-    def height
-      block_height * block_size
+    def top_px
+      top * 40
     end
 
-    def block_height
-      shape.count { |row| row.index(true) }
+    def block_attributes(x, y)
+      [
+        left_px + x * unit_size,
+        top_px + y * unit_size,
+        unit_size,
+        unit_size
+      ]
     end
 
     def color
       "#000"
     end
 
-    def block_size
+    def unit_size
       40
     end
 
     def move_left
-      move(-block_size, 0) unless (left - block_size) < 0
+      @left -= 1 #unless (left - block_size) < 0
+      update_map
     end
 
     def move_right
-      move(block_size, 0) unless (right + block_size) > 400
+      @left += 1 #unless (right + block_size) > 400
+      update_map
     end
 
     def move_up
-      rotate_counterclockwise unless (top + width) > 600
+      @shape = @shape.transpose #unless (top + width) > 600
+      update_map
     end
 
     def move_down
-      move(0, block_size) unless (bottom + block_size) > 600
+      @top += 1 #unless (bottom + block_size) > 600
+      update_map
+    end
+
+    def update_map
+      @map.update_piece(self)
+      @renderer.call(self)
     end
 
     private
-
-    def move(move_left, move_top)
-      @left += move_left
-      @top += move_top
-      @renderer.call(self)
-    end
-
-    def rotate_counterclockwise
-      @shape = @shape.transpose
-      @renderer.call(self)
-    end
 
     def default_shape
       Array[

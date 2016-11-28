@@ -5,6 +5,7 @@ module Tetris
 
     def initialize(renderer = Proc.new {})
       @renderer = renderer
+      @grid = default_grid
 
       @renderer.call(self)
     end
@@ -33,8 +34,14 @@ module Tetris
       15
     end
 
-    def grid
-      Matrix.build(width, height) { false }
+    def update_piece(piece)
+      # @grid.rows.map! { |row| cols.map! { |col|  } }
+    end
+
+    private
+
+    def default_grid
+      Array.new(height, Array.new(width, false))
     end
   end
 end
