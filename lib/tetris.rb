@@ -7,6 +7,7 @@ require "piece/o_piece"
 require "piece/s_piece"
 require "piece/t_piece"
 require "piece/z_piece"
+require "piece_factory"
 
 module Tetris
 end

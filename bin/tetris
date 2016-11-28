@@ -33,7 +33,7 @@ Shoes.app width: 400, height: 620, resizable: false do
 
   @anim = animate 1 do
     if @current_piece.nil? || @current_piece.blocked_down?
-      @new_piece = Tetris::TPiece.new(@map, render_piece)
+      @new_piece = Tetris::PieceFactory.build(@map, render_piece)
       @map.pieces << @new_piece
       @current_piece = @new_piece
       # @anim.stop and alert('Done!')
