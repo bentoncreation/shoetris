@@ -80,7 +80,7 @@ module Tetris
     def add_missing_rows
       missing_rows = height - grid.size
       return if missing_rows < 1
-      missing_rows.each do
+      missing_rows.times do
         grid.unshift(Array.new(width, false))
       end
     end
