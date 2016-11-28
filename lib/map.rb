@@ -67,6 +67,24 @@ module Tetris
       puts grid.map { |row| row.map(&:to_s).join(" ") }.join("\n")
     end
 
+    def update_rows
+      clear_filled_rows
+      add_missing_rows
+      pieces.map(&:render)
+    end
+
+    def clear_filled_rows
+      grid.delete_if { |row| row.none? { |col| col == false } }
+    end
+
+    def add_missing_rows
+      missing_rows = height - grid.size
+      return if missing_rows < 1
+      missing_rows.each do
+        grid.unshift(Array.new(width, false))
+      end
+    end
+
     private
 
     def default_grid

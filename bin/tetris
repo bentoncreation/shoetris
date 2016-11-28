@@ -39,6 +39,7 @@ Shoes.app width: 400, height: 620, resizable: false do
       # @anim.stop and alert('Done!')
     else
       @current_piece.move_down
+      @map.update_rows
     end
   end
 
