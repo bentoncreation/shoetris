@@ -7,48 +7,21 @@ module Tetris
 
     def initialize(map, renderer = Proc.new {})
       @id = SecureRandom.uuid
-      @left = 0
-      @top = 0
       @shape = default_shape
       @map = map
       @renderer = renderer
-
-      @renderer.call(self)
-    end
-
-    def at_left_edge?
-    end
-
-    def at_right_edge?
+      update_position(0, 0)
+      render
     end
 
     def blocked_down?
-      false
+      @map.collision_at?(self, @left, @top + 1)
     end
 
-    # def right
-    #   left + width
-    # end
-
-    # def bottom
-    #   top + height
-    # end
-
-    # def width
-    #   block_width * block_size
-    # end
-
-    # def block_width
-    #   shape.map { |row| row.rindex(true) || 0 }.max + 1
-    # end
-
-    # def height
-    #   block_height * block_size
-    # end
-
-    # def block_height
-    #   shape.count { |row| row.index(true) }
-    # end
+    def update_position(left, top)
+      @left = left
+      @top = top
+    end
 
     def left_px
       left * 40
@@ -76,27 +49,31 @@ module Tetris
     end
 
     def move_left
-      @left -= 1 #unless (left - block_size) < 0
-      update_map
+      move_to(@left - 1, @top)
+      render
     end
 
     def move_right
-      @left += 1 #unless (right + block_size) > 400
-      update_map
+      move_to(@left + 1, @top)
+      render
     end
 
     def move_up
-      @shape = @shape.transpose #unless (top + width) > 600
-      update_map
     end
 
     def move_down
-      @top += 1 #unless (bottom + block_size) > 600
-      update_map
+      move_to(@left, @top + 1)
+      render
     end
 
-    def update_map
+    def move_to(left, top)
+      return false if @map.collision_at?(self, left, top)
+      update_position(left, top)
+      @map.remove_piece(self)
       @map.update_piece(self)
+    end
+
+    def render
       @renderer.call(self)
     end
 

@@ -1,7 +1,7 @@
 module Tetris
   class Map
-    attr_reader :grid, :background_color, :unit_size, :width, :height
-    attr_accessor :rendered, :pieces
+    attr_reader :background_color, :unit_size, :width, :height
+    attr_accessor :grid, :rendered, :pieces
 
     def initialize(renderer = Proc.new {})
       @renderer = renderer
@@ -36,15 +36,35 @@ module Tetris
     end
 
     def update_piece(piece)
-      piece.shape.each_with_index do |row, row_index|
+      piece.shape.map.with_index do |row, row_index|
         row.each_with_index do |col, col_index|
           grid[row_index + piece.top][col_index + piece.left] = piece if col
         end
       end
     end
 
+    def collision_at?(piece, left, top)
+      piece.shape.each_with_index do |row, row_index|
+        row.each_with_index do |col, col_index|
+          y = row_index + top
+          x = col_index + left
+          next unless col
+          return true if y < 0 || y >= height
+          return true if x < 0 || x >= width
+          # puts "grid[#{y}][#{x}] #{grid[y][x]}"
+          return true unless grid[y][x] == piece || grid[y][x] == false
+        end
+      end
+
+      return false
+    end
+
+    def remove_piece(piece)
+      grid.map! { |row| row.map { |col| col == piece ? false : col } }
+    end
+
     def debug_grid
-      puts grid.map {|row| row.map(&:to_s).join(" ") }.join("\n")
+      puts grid.map { |row| row.map(&:to_s).join(" ") }.join("\n")
     end
 
     private
