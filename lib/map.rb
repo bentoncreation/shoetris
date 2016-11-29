@@ -3,12 +3,14 @@ module Tetris
     attr_reader :background_color, :unit_size, :width, :height
     attr_accessor :grid, :rendered, :pieces
 
-    def initialize(renderer = Proc.new {})
+    def initialize(renderer = Proc.new {}, debugger = Proc.new {})
       @renderer = renderer
+      @debugger = debugger
       @grid = default_grid
       @pieces = []
+      @rendered = []
 
-      @renderer.call(self)
+      render
     end
 
     def background_color
@@ -70,7 +72,6 @@ module Tetris
     def update_rows
       clear_filled_rows
       add_missing_rows
-      pieces.map(&:render)
     end
 
     def clear_filled_rows
@@ -80,9 +81,20 @@ module Tetris
     def add_missing_rows
       missing_rows = height - grid.size
       return if missing_rows < 1
+
       missing_rows.times do
         grid.unshift(Array.new(width, false))
       end
+
+      render
+    end
+
+    def render
+      @renderer.call(self)
+    end
+
+    def debugger(message)
+      @debugger.call(message)
     end
 
     private

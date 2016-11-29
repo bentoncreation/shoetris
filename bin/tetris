@@ -10,14 +10,36 @@ Shoes.app width: 400, height: 620, resizable: false do
     rect(attrs[0], attrs[1], attrs[2], attrs[3])
   end
 
+  debugger = Proc.new do |message|
+    debug message
+  end
+
   render_map = Proc.new do |map|
-    map.rendered = shape do
-      fill map.background_color
-      rect(map.left, map.top, map.width * map.unit_size, map.height * map.unit_size)
+    if !map.rendered.empty?
+      map.rendered.each do |render|
+        render.remove
+      end
+      map.rendered.clear
+    end
+
+    map.grid.each_with_index do |row, row_index|
+      row.each_with_index do |col, col_index|
+        if col && col != @current_piece
+          map.rendered << shape do
+            fill col.color
+            rect(col_index * map.unit_size, row_index * map.unit_size, map.unit_size, map.unit_size)
+          end
+        end
+      end
     end
   end
 
-  @map = Tetris::Map.new(render_map)
+  @map = Tetris::Map.new(render_map, debugger)
+
+  shape do
+    fill @map.background_color
+    rect(@map.left, @map.top, @map.width * @map.unit_size, @map.height * @map.unit_size)
+  end
 
   render_piece = Proc.new do |piece|
     piece.rendered.remove if !piece.rendered.nil?
@@ -33,14 +55,16 @@ Shoes.app width: 400, height: 620, resizable: false do
 
   @anim = animate 1 do
     if @current_piece.nil? || @current_piece.blocked_down?
+      @current_piece.rendered.remove if !@current_piece.nil? && @current_piece.blocked_down?
       @new_piece = Tetris::PieceFactory.build(@map, render_piece)
       @map.pieces << @new_piece
       @current_piece = @new_piece
+      @map.render
       # @anim.stop and alert('Done!')
     else
       @current_piece.move_down
-      @map.update_rows
     end
+    @map.update_rows
   end
 
   keypress do |key|
