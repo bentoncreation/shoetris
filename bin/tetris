@@ -14,19 +14,15 @@ Shoes.app width: 400, height: 620, resizable: false do
     debug message
   end
 
-  map_renderer = Proc.new do |map|
-    map.rendered.map!(&:remove).clear unless map.rendered.empty?
-
-    map.grid.each_with_index do |row, row_index|
-      row.each_with_index do |col, col_index|
-        if col && col != @current_piece
-          map.rendered << shape do
-            fill col.color
-            rect(col_index * map.unit_size, row_index * map.unit_size, map.unit_size, map.unit_size)
-          end
-        end
-      end
+  shape_renderer = Proc.new do |color, left, top, width, height|
+    shape do
+      fill color
+      rect(left, top, width, height)
     end
+  end
+
+  shape_remover = Proc.new do |shape|
+    shape.remove
   end
 
   piece_renderer = Proc.new do |piece|
@@ -42,18 +38,14 @@ Shoes.app width: 400, height: 620, resizable: false do
     end
   end
 
-  @map = Tetris::Map.new(map_renderer, piece_renderer, debugger)
-
-  shape do
-    fill @map.background_color
-    rect(@map.left, @map.top, @map.width * @map.unit_size, @map.height * @map.unit_size)
-  end
+  @map = Tetris::Map.new(piece_renderer, shape_renderer, shape_remover, debugger)
 
   @anim = animate 1 do
     if @map.current_piece.blocked_down?
-      @map.generate_new_piece
-      @map.render
-      # @anim.stop and alert('Done!')
+      unless @map.generate_new_piece
+        @anim.stop and alert("Game Over")
+      end
+      @map.render_grid
     else
       @map.current_piece.move_down
     end

@@ -5,11 +5,13 @@ module Tetris
     attr_reader :color, :id
     attr_accessor :left, :top, :left_px, :top_px, :bottom, :shape, :rendered
 
-    def initialize(map, renderer = Proc.new {})
+    def initialize(map, renderer = Proc.new {}, shape_renderer = Proc.new {}, shape_remover = Proc.new {})
       @id = SecureRandom.uuid
       @shape = default_shape
       @map = map
       @renderer = renderer
+      @shape_renderer = shape_renderer
+      @shape_remover = shape_remover
       update_position(0, 0)
       render
     end
@@ -75,6 +77,30 @@ module Tetris
 
     def render
       @renderer.call(self)
+    end
+
+    def render_piece
+      derender_piece
+
+      piece.rendered = @shape_renderer.call(color,
+                                            col_index * unit_size,
+                                            row_index * unit_size,
+                                            unit_size,
+                                            unit_size)
+
+      shape do
+        fill piece.color
+        piece.shape.each_with_index do |row, y|
+          row.each_with_index do |col, x|
+            rect_builder(piece.block_attributes(x, y)) if col
+          end
+        end
+      end
+    end
+
+    def derender_piece
+      return if rendered.nil?
+      @shape_remover.call(rendered)
     end
 
     private

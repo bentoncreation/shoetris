@@ -3,24 +3,32 @@ module Tetris
     attr_reader :background_color, :unit_size, :width, :height
     attr_accessor :grid, :rendered, :pieces, :current_piece
 
-    def initialize(map_renderer = Proc.new {}, piece_renderer = Proc.new {}, debugger = Proc.new {})
-      @map_renderer = map_renderer
+    def initialize(piece_renderer = Proc.new {}, shape_renderer = Proc.new {}, shape_remover = Proc.new {}, debugger = Proc.new {})
       @piece_renderer = piece_renderer
+      @shape_renderer = shape_renderer
+      @shape_remover = shape_remover
       @debugger = debugger
       @grid = default_grid
       @pieces = []
       @rendered = []
 
+      render_background
       generate_new_piece
-      render
+      render_grid
     end
 
     def generate_new_piece
       @current_piece.rendered.remove unless @current_piece.nil?
 
-      new_piece = Tetris::PieceFactory.build(self, @piece_renderer)
+      new_piece = Tetris::PieceFactory.build(self, @piece_renderer, @shape_renderer)
       @pieces << new_piece
       @current_piece = new_piece
+
+      if collision_at?(@current_piece, @current_piece.left, @current_piece.top)
+        return false
+      else
+        return true
+      end
     end
 
     def background_color
@@ -96,11 +104,37 @@ module Tetris
         grid.unshift(Array.new(width, false))
       end
 
-      render
+      render_grid
     end
 
-    def render
-      @map_renderer.call(self)
+    def render_background
+      @shape_renderer.call(background_color,
+                           left,
+                           top,
+                           width * unit_size,
+                           height * unit_size)
+    end
+
+    def render_grid
+      derender_grid
+
+      grid.each_with_index do |row, row_index|
+        row.each_with_index do |col, col_index|
+          if col && col != @current_piece
+            rendered << @shape_renderer.call(col.color,
+                                             col_index * unit_size,
+                                             row_index * unit_size,
+                                             unit_size,
+                                             unit_size)
+          end
+        end
+      end
+    end
+
+    def derender_grid
+      return if rendered.empty?
+      rendered.map { |render| @shape_remover.call(render) }
+      rendered.clear
     end
 
     def debugger(message)
