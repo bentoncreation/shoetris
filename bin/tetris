@@ -15,12 +15,7 @@ Shoes.app width: 400, height: 620, resizable: false do
   end
 
   render_map = Proc.new do |map|
-    if !map.rendered.empty?
-      map.rendered.each do |render|
-        render.remove
-      end
-      map.rendered.clear
-    end
+    map.rendered.map!(&:remove).clear unless map.rendered.empty?
 
     map.grid.each_with_index do |row, row_index|
       row.each_with_index do |col, col_index|
@@ -42,7 +37,7 @@ Shoes.app width: 400, height: 620, resizable: false do
   end
 
   render_piece = Proc.new do |piece|
-    piece.rendered.remove if !piece.rendered.nil?
+    piece.rendered.remove unless piece.rendered.nil?
     piece.rendered = shape do
       fill piece.color
       piece.shape.each_with_index do |row, y|
