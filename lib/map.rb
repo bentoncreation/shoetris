@@ -1,16 +1,26 @@
 module Tetris
   class Map
     attr_reader :background_color, :unit_size, :width, :height
-    attr_accessor :grid, :rendered, :pieces
+    attr_accessor :grid, :rendered, :pieces, :current_piece
 
-    def initialize(renderer = Proc.new {}, debugger = Proc.new {})
-      @renderer = renderer
+    def initialize(map_renderer = Proc.new {}, piece_renderer = Proc.new {}, debugger = Proc.new {})
+      @map_renderer = map_renderer
+      @piece_renderer = piece_renderer
       @debugger = debugger
       @grid = default_grid
       @pieces = []
       @rendered = []
 
+      generate_new_piece
       render
+    end
+
+    def generate_new_piece
+      @current_piece.rendered.remove unless @current_piece.nil?
+
+      new_piece = Tetris::PieceFactory.build(self, @piece_renderer)
+      @pieces << new_piece
+      @current_piece = new_piece
     end
 
     def background_color
@@ -90,7 +100,7 @@ module Tetris
     end
 
     def render
-      @renderer.call(self)
+      @map_renderer.call(self)
     end
 
     def debugger(message)

@@ -14,7 +14,7 @@ Shoes.app width: 400, height: 620, resizable: false do
     debug message
   end
 
-  render_map = Proc.new do |map|
+  map_renderer = Proc.new do |map|
     map.rendered.map!(&:remove).clear unless map.rendered.empty?
 
     map.grid.each_with_index do |row, row_index|
@@ -29,15 +29,9 @@ Shoes.app width: 400, height: 620, resizable: false do
     end
   end
 
-  @map = Tetris::Map.new(render_map, debugger)
-
-  shape do
-    fill @map.background_color
-    rect(@map.left, @map.top, @map.width * @map.unit_size, @map.height * @map.unit_size)
-  end
-
-  render_piece = Proc.new do |piece|
+  piece_renderer = Proc.new do |piece|
     piece.rendered.remove unless piece.rendered.nil?
+
     piece.rendered = shape do
       fill piece.color
       piece.shape.each_with_index do |row, y|
@@ -48,29 +42,33 @@ Shoes.app width: 400, height: 620, resizable: false do
     end
   end
 
+  @map = Tetris::Map.new(map_renderer, piece_renderer, debugger)
+
+  shape do
+    fill @map.background_color
+    rect(@map.left, @map.top, @map.width * @map.unit_size, @map.height * @map.unit_size)
+  end
+
   @anim = animate 1 do
-    if @current_piece.nil? || @current_piece.blocked_down?
-      @current_piece.rendered.remove if !@current_piece.nil? && @current_piece.blocked_down?
-      @new_piece = Tetris::PieceFactory.build(@map, render_piece)
-      @map.pieces << @new_piece
-      @current_piece = @new_piece
+    if @map.current_piece.blocked_down?
+      @map.generate_new_piece
       @map.render
       # @anim.stop and alert('Done!')
     else
-      @current_piece.move_down
+      @map.current_piece.move_down
     end
     @map.update_rows
   end
 
   keypress do |key|
     if key == :left
-      @current_piece.move_left
+      @map.current_piece.move_left
     elsif key == :right
-      @current_piece.move_right
+      @map.current_piece.move_right
     elsif key == :up
-      @current_piece.move_up
+      @map.current_piece.move_up
     elsif key == :down
-      @current_piece.move_down
+      @map.current_piece.move_down
     end
   end
 end
