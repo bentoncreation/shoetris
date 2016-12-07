@@ -1,3 +1,4 @@
+require "game"
 require "map"
 require "rectangle"
 require "piece/base_piece"

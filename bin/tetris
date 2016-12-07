@@ -22,6 +22,11 @@ Shoes.app width: 400, height: 620, resizable: false do
     shape.remove
   end
 
+  titler = Proc.new do |text|
+    title(text)
+  end
+
+  @game = Tetris::Game.new(titler)
   @map = Tetris::Map.new(renderer, remover, debugger)
 
   @anim = animate 1 do
@@ -38,13 +43,16 @@ Shoes.app width: 400, height: 620, resizable: false do
 
   keypress do |key|
     if key == :left
-      @map.current_piece.move_left
+      @map.current_piece.move_left unless @game.paused?
     elsif key == :right
-      @map.current_piece.move_right
+      @map.current_piece.move_right unless @game.paused?
     elsif key == :up
-      @map.current_piece.rotate
+      @map.current_piece.rotate unless @game.paused?
     elsif key == :down
-      @map.current_piece.move_down
+      @map.current_piece.move_down unless @game.paused?
+    elsif key == :escape
+      @anim.toggle
+      @game.toggle
     end
   end
 end
