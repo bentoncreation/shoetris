@@ -17,6 +17,7 @@ module Tetris
     end
 
     def generate_new_piece
+      update_rows
       @current_piece.derender unless @current_piece.nil?
 
       new_piece = Tetris::PieceFactory.build(self, @renderer, @remover,

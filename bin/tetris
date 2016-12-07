@@ -40,7 +40,6 @@ Shoes.app width: 300, height: 470, resizable: false do
     else
       @map.current_piece.move_down
     end
-    @map.update_rows
   end
 
   keypress do |key|
