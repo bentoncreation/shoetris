@@ -37,11 +37,11 @@ module Tetris
     end
 
     def stroke_color
-      "#000"
+      "#333"
     end
 
     def stroke_width
-      0
+      2
     end
 
     def left
@@ -53,7 +53,7 @@ module Tetris
     end
 
     def unit_size
-      40
+      30
     end
 
     def width

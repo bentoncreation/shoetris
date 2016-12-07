@@ -2,7 +2,7 @@
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/../lib")
 require "tetris"
 
-Shoes.app width: 400, height: 620, resizable: false do
+Shoes.app width: 300, height: 470, resizable: false do
   background gray
 
   debugger = Proc.new do |message|
@@ -31,7 +31,7 @@ Shoes.app width: 400, height: 620, resizable: false do
   @game = Tetris::Game.new(titler)
   @map = Tetris::Map.new(renderer, remover, debugger)
 
-  @anim = animate 1 do
+  @anim = animate 2 do
     if @map.current_piece.blocked_down?
       unless @map.generate_new_piece
         @anim.stop and alert("Game Over")
