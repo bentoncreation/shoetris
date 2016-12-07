@@ -1,6 +1,6 @@
 module Tetris
   class ZPiece < BasePiece
-    def color
+    def fill_color
       "#f00"
     end
 

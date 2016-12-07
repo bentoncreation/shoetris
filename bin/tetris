@@ -9,9 +9,11 @@ Shoes.app width: 400, height: 620, resizable: false do
     debug message
   end
 
-  renderer = Proc.new do |color, rectangles|
+  renderer = Proc.new do |fill_color, stroke_color, stroke_width, rectangles|
     shape do
-      fill color
+      fill fill_color
+      stroke stroke_color
+      strokewidth stroke_width
       Array(rectangles).each do |r|
         rect(r.left, r.top, r.width, r.height)
       end

@@ -1,6 +1,6 @@
 module Tetris
   class Map
-    attr_reader :background_color, :unit_size, :width, :height
+    attr_reader :unit_size, :width, :height
     attr_accessor :grid, :pieces, :current_piece
 
     def initialize(renderer = Proc.new {}, remover = Proc.new {}, debugger = Proc.new {})
@@ -32,8 +32,16 @@ module Tetris
       end
     end
 
-    def background_color
+    def fill_color
       "#efefef"
+    end
+
+    def stroke_color
+      "#000"
+    end
+
+    def stroke_width
+      0
     end
 
     def left
@@ -108,7 +116,8 @@ module Tetris
     end
 
     def render_background
-      @renderer.call(background_color, background_rectangle)
+      @renderer.call(fill_color, stroke_color, stroke_width,
+                     background_rectangle)
     end
 
     def background_rectangle
@@ -121,11 +130,13 @@ module Tetris
       grid.each_with_index do |row, row_index|
         row.each_with_index do |col, col_index|
           next unless col && col != @current_piece
-          @rendered << @renderer.call(col.color,
-                                     Rectangle.new(col_index * unit_size,
-                                                   row_index * unit_size,
-                                                   unit_size,
-                                                   unit_size))
+          @rendered << @renderer.call(col.fill_color,
+                                      col.stroke_color,
+                                      col.stroke_width,
+                                      Rectangle.new(col_index * unit_size,
+                                                    row_index * unit_size,
+                                                    unit_size,
+                                                    unit_size))
         end
       end
     end

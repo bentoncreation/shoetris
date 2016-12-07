@@ -26,19 +26,27 @@ module Tetris
     end
 
     def left_px
-      left * 40
+      left * unit_size
     end
 
     def top_px
-      top * 40
+      top * unit_size
     end
 
-    def color
+    def fill_color
       "#000"
     end
 
+    def stroke_color
+      "#333"
+    end
+
+    def stroke_width
+      2
+    end
+
     def unit_size
-      40
+      @map.unit_size
     end
 
     def move_left
@@ -72,7 +80,8 @@ module Tetris
 
     def render
       derender
-      @rendered = @renderer.call(color, rectangles)
+      @rendered = @renderer.call(fill_color, stroke_color, stroke_width,
+                                 rectangles)
     end
 
     def derender
