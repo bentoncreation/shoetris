@@ -1,4 +1,5 @@
 require "map"
+require "rectangle"
 require "piece/base_piece"
 require "piece/i_piece"
 require "piece/j_piece"

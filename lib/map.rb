@@ -1,12 +1,11 @@
 module Tetris
   class Map
     attr_reader :background_color, :unit_size, :width, :height
-    attr_accessor :grid, :rendered, :pieces, :current_piece
+    attr_accessor :grid, :pieces, :current_piece
 
-    def initialize(piece_renderer = Proc.new {}, shape_renderer = Proc.new {}, shape_remover = Proc.new {}, debugger = Proc.new {})
-      @piece_renderer = piece_renderer
-      @shape_renderer = shape_renderer
-      @shape_remover = shape_remover
+    def initialize(renderer = Proc.new {}, remover = Proc.new {}, debugger = Proc.new {})
+      @renderer = renderer
+      @remover = remover
       @debugger = debugger
       @grid = default_grid
       @pieces = []
@@ -18,9 +17,9 @@ module Tetris
     end
 
     def generate_new_piece
-      @current_piece.rendered.remove unless @current_piece.nil?
+      @current_piece.derender unless @current_piece.nil?
 
-      new_piece = Tetris::PieceFactory.build(self, @piece_renderer, @shape_renderer)
+      new_piece = Tetris::PieceFactory.build(self, @renderer, @remover, @debugger)
       @pieces << new_piece
       @current_piece = new_piece
 
@@ -108,11 +107,11 @@ module Tetris
     end
 
     def render_background
-      @shape_renderer.call(background_color,
-                           left,
-                           top,
-                           width * unit_size,
-                           height * unit_size)
+      @renderer.call(background_color, background_rectangle)
+    end
+
+    def background_rectangle
+      Rectangle.new(left, top, width * unit_size, height * unit_size)
     end
 
     def render_grid
@@ -120,24 +119,23 @@ module Tetris
 
       grid.each_with_index do |row, row_index|
         row.each_with_index do |col, col_index|
-          if col && col != @current_piece
-            rendered << @shape_renderer.call(col.color,
-                                             col_index * unit_size,
-                                             row_index * unit_size,
-                                             unit_size,
-                                             unit_size)
-          end
+          next unless col && col != @current_piece
+          @rendered << @renderer.call(col.color,
+                                     Rectangle.new(col_index * unit_size,
+                                                   row_index * unit_size,
+                                                   unit_size,
+                                                   unit_size))
         end
       end
     end
 
     def derender_grid
-      return if rendered.empty?
-      rendered.map { |render| @shape_remover.call(render) }
-      rendered.clear
+      return if @rendered.empty?
+      @rendered.map { |render| @remover.call(render) }
+      @rendered.clear
     end
 
-    def debugger(message)
+    def debug(message)
       @debugger.call(message)
     end
 

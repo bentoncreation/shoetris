@@ -3,15 +3,15 @@ require "securerandom"
 module Tetris
   class BasePiece
     attr_reader :color, :id
-    attr_accessor :left, :top, :left_px, :top_px, :bottom, :shape, :rendered
+    attr_accessor :left, :top, :left_px, :top_px, :bottom, :shape, :renderer, :remover, :debugger
 
-    def initialize(map, renderer = Proc.new {}, shape_renderer = Proc.new {}, shape_remover = Proc.new {})
+    def initialize(map, renderer = Proc.new {}, remover = Proc.new {}, debugger = Proc.new {})
       @id = SecureRandom.uuid
       @shape = default_shape
       @map = map
       @renderer = renderer
-      @shape_renderer = shape_renderer
-      @shape_remover = shape_remover
+      @remover = remover
+      @debugger = debugger
       update_position(0, 0)
       render
     end
@@ -31,15 +31,6 @@ module Tetris
 
     def top_px
       top * 40
-    end
-
-    def block_attributes(x, y)
-      [
-        left_px + x * unit_size,
-        top_px + y * unit_size,
-        unit_size,
-        unit_size
-      ]
     end
 
     def color
@@ -76,31 +67,32 @@ module Tetris
     end
 
     def render
-      @renderer.call(self)
+      derender
+      @rendered = @renderer.call(color, rectangles)
     end
 
-    def render_piece
-      derender_piece
+    def derender
+      return if @rendered.nil?
+      @remover.call(@rendered)
+      # @rendered = nil
+    end
 
-      piece.rendered = @shape_renderer.call(color,
-                                            col_index * unit_size,
-                                            row_index * unit_size,
-                                            unit_size,
-                                            unit_size)
-
-      shape do
-        fill piece.color
-        piece.shape.each_with_index do |row, y|
-          row.each_with_index do |col, x|
-            rect_builder(piece.block_attributes(x, y)) if col
-          end
+    def rectangles
+      rectangles = []
+      shape.each_with_index do |row, y|
+        row.each_with_index do |col, x|
+          next unless col
+          rectangles << Rectangle.new(left_px + x * unit_size,
+                                      top_px + y * unit_size,
+                                      unit_size,
+                                      unit_size)
         end
       end
+      rectangles
     end
 
-    def derender_piece
-      return if rendered.nil?
-      @shape_remover.call(rendered)
+    def debug(message)
+      @debugger.call(message)
     end
 
     private

@@ -5,40 +5,24 @@ require "tetris"
 Shoes.app width: 400, height: 620, resizable: false do
   background gray
 
-  def rect_builder(*attrs)
-    attrs.flatten!
-    rect(attrs[0], attrs[1], attrs[2], attrs[3])
-  end
-
   debugger = Proc.new do |message|
     debug message
   end
 
-  shape_renderer = Proc.new do |color, left, top, width, height|
+  renderer = Proc.new do |color, rectangles|
     shape do
       fill color
-      rect(left, top, width, height)
-    end
-  end
-
-  shape_remover = Proc.new do |shape|
-    shape.remove
-  end
-
-  piece_renderer = Proc.new do |piece|
-    piece.rendered.remove unless piece.rendered.nil?
-
-    piece.rendered = shape do
-      fill piece.color
-      piece.shape.each_with_index do |row, y|
-        row.each_with_index do |col, x|
-          rect_builder(piece.block_attributes(x, y)) if col
-        end
+      Array(rectangles).each do |r|
+        rect(r.left, r.top, r.width, r.height)
       end
     end
   end
 
-  @map = Tetris::Map.new(piece_renderer, shape_renderer, shape_remover, debugger)
+  remover = Proc.new do |shape|
+    shape.remove
+  end
+
+  @map = Tetris::Map.new(renderer, remover, debugger)
 
   @anim = animate 1 do
     if @map.current_piece.blocked_down?
