@@ -19,11 +19,13 @@ module Tetris
     def generate_new_piece
       @current_piece.derender unless @current_piece.nil?
 
-      new_piece = Tetris::PieceFactory.build(self, @renderer, @remover, @debugger)
+      new_piece = Tetris::PieceFactory.build(self, @renderer, @remover,
+                                             @debugger)
       @pieces << new_piece
       @current_piece = new_piece
 
-      if collision_at?(@current_piece, @current_piece.left, @current_piece.top)
+      if collision_at?(@current_piece, @current_piece.shape,
+                       @current_piece.left, @current_piece.top)
         return false
       else
         return true
@@ -62,15 +64,14 @@ module Tetris
       end
     end
 
-    def collision_at?(piece, left, top)
-      piece.shape.each_with_index do |row, row_index|
+    def collision_at?(piece, shape, left, top)
+      shape.each_with_index do |row, row_index|
         row.each_with_index do |col, col_index|
           y = row_index + top
           x = col_index + left
           next unless col
           return true if y < 0 || y >= height
           return true if x < 0 || x >= width
-          # puts "grid[#{y}][#{x}] #{grid[y][x]}"
           return true unless grid[y][x] == piece || grid[y][x] == false
         end
       end

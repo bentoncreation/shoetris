@@ -17,7 +17,7 @@ module Tetris
     end
 
     def blocked_down?
-      @map.collision_at?(self, @left, @top + 1)
+      @map.collision_at?(self, @shape, @left, @top + 1)
     end
 
     def update_position(left, top)
@@ -51,7 +51,11 @@ module Tetris
       render
     end
 
-    def move_up
+    def rotate
+      rotated_shape = @shape.transpose.reverse
+      return false if @map.collision_at?(self, rotated_shape, left, top)
+      @shape = rotated_shape
+      render
     end
 
     def move_down
@@ -60,7 +64,7 @@ module Tetris
     end
 
     def move_to(left, top)
-      return false if @map.collision_at?(self, left, top)
+      return false if @map.collision_at?(self, @shape, left, top)
       update_position(left, top)
       @map.remove_piece(self)
       @map.update_piece(self)

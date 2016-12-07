@@ -42,7 +42,7 @@ Shoes.app width: 400, height: 620, resizable: false do
     elsif key == :right
       @map.current_piece.move_right
     elsif key == :up
-      @map.current_piece.move_up
+      @map.current_piece.rotate
     elsif key == :down
       @map.current_piece.move_down
     end
